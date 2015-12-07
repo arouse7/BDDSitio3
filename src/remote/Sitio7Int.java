@@ -12,10 +12,10 @@ import modelo.dto.DataTable;
  *
  * @author jdosornio
  */
-public interface Sitio1Int extends Sitio {
+public interface Sitio7Int extends Sitio {
     
     /**
-     * Obtiene el primer_nombre, segundo_nombre, apellido_paterno y
+     * Obtiene el primer_nombre, segundo_nombre, apellido_paterno,
      * apellido_materno y id_puesto de un empleado dado un número de empleado.
      * 
      * @param numeroEmp el número del empleado que se desea obtener
