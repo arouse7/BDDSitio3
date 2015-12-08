@@ -43,5 +43,4 @@ public class InicioServidor {
             Logger.getLogger(InicioServidor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
 }

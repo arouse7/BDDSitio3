@@ -21,7 +21,7 @@ public class ConnectionManager {
     private static final ThreadLocal<Connection> conexion = new ThreadLocal<>();
     private static final String user = "root";
     private static final String pass = "";
-    private static final String url = "jdbc:mysql://localhost:3306/capacisoft";
+    private static final String url = "jdbc:mysql://localhost:3306/capacisoftnodo3";
     private static final String driver = "com.mysql.jdbc.Driver";
 
     public static Connection conectar() {
