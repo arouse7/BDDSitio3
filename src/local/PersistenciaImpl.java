@@ -10,6 +10,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import modelo.dao.BaseDAO;
 import modelo.dto.DataTable;
 import persistencia.Persistencia;
 import transaction.TransactionManager;
@@ -78,7 +79,7 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
 
             ok = TransactionManager.insertPlantel(false, tablasPlantel.get(0),
                     dtPlantel.get(0));
-            
+
             System.out.println("Inserción de plantel: " + tablas.length
                     + " tablas, resultado: "
                     + ok);
@@ -110,4 +111,19 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public DataTable get(String tabla, String[] columnas, String[] aliases,
+            Map<String, ?> attrWhere) throws RemoteException {
+
+        DataTable dt = null;
+
+        if (!tabla.equalsIgnoreCase("empleado")
+                && !tabla.equalsIgnoreCase("plantel")
+                && !tabla.equalsIgnoreCase("implementacion_evento_empleado")) {
+            //Todas son consultas locales....
+            dt = new BaseDAO().get(tabla, columnas, aliases, attrWhere);
+        }
+
+        return dt;
+    }
 }

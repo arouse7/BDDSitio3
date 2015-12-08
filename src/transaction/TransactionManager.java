@@ -28,6 +28,8 @@ import remote.util.QueryManager;
 public class TransactionManager {
 
     private static final String EMPLEADO = "empleado";
+    private static final int LLAVES = 1;
+    private static final int NOMBRES = 0;
 
     public static boolean insertReplicado(boolean savePKs, String[] tablas,
             DataTable... datos) {
@@ -77,7 +79,7 @@ public class TransactionManager {
                 "direccion_id"
             };
 
-            short result = 1;
+            short result = LLAVES;
             DataTable[] fragmentos;
             datos.rewind();
             datos.next();
@@ -89,9 +91,11 @@ public class TransactionManager {
                 //fragento llaves fragmentos[1] aqui están la mayoría de las llaves
                 fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
 
-                result = QueryManager.uniInsert(false, Interfaces.SITIO_1, new String[]{EMPLEADO}, new DataTable[]{fragmentos[0]});
+                result = QueryManager.uniInsert(false, Interfaces.SITIO_1, new String[]{EMPLEADO}, 
+                        new DataTable[]{fragmentos[NOMBRES]});
                 System.out.println("Sitio 1: " + result);
-                result *= QueryManager.uniInsert(false, Interfaces.SITIO_2, new String[]{EMPLEADO}, new DataTable[]{fragmentos[1]});
+                result *= QueryManager.uniInsert(false, Interfaces.SITIO_2, new String[]{EMPLEADO}, 
+                        new DataTable[]{fragmentos[LLAVES]});
                 System.out.println("Sitio 2: " + result);
             } else {
 
@@ -99,18 +103,19 @@ public class TransactionManager {
                 mapa.put("id", datos.getInt("plantel_id"));
                 BaseDAO dao = new BaseDAO();
 
-                DataTable plantel = dao.get("plantel", mapa);
+                DataTable plantel = dao.get("plantel",null,null, mapa);
 
                 //se verifica en su nodo si se encuentra el plantel al que se insertara
                 // cambiar por sus nodos el nombre de la variable de sitio y la interface
-                if (plantel != null && plantel.getRowCount() != 0) {
+                if (plantel != null && plantel.getRowCount() != NOMBRES) {
 
                     fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
 //                    //este es su nodo ya no lo inserten de nuevo
-                    result = (dao.add(EMPLEADO, fragmentos[1], false) != null) ? (short) 1 : (short) 0;
+                    result = (dao.add(EMPLEADO, fragmentos[LLAVES], false) != null) ? (short) LLAVES : (short) NOMBRES;
                     System.out.println("Sitio Local: " + result);
 
-                    result *= QueryManager.uniInsert(false, Interfaces.SITIO_4, new String[]{EMPLEADO}, new DataTable[]{fragmentos[0]});
+                    result *= QueryManager.uniInsert(false, Interfaces.SITIO_4, 
+                            new String[]{EMPLEADO}, new DataTable[]{fragmentos[NOMBRES]});
                     System.out.println("Sitio 4: " + result);
 
                 } else {
@@ -120,34 +125,38 @@ public class TransactionManager {
 //                    busca en la zona 1 si se encuentra el platel
                     Sitio sitio2 = InterfaceManager.getInterface(InterfaceManager.
                             getInterfaceServicio(Interfaces.SITIO_2));
-                    plantel = sitio2.get("plantel", mapa);
+                    plantel = sitio2.get("plantel", null,null,mapa);
 
-                    if (plantel != null && plantel.getRowCount() != 0) {
+                    if (plantel != null && plantel.getRowCount() != NOMBRES) {
 
                         //aqui se encuentra
                         fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
 
-                        result = QueryManager.uniInsert(false, Interfaces.SITIO_1, new String[]{EMPLEADO}, new DataTable[]{fragmentos[0]});
+                        result = QueryManager.uniInsert(false, Interfaces.SITIO_1, new String[]{EMPLEADO}, 
+                                new DataTable[]{fragmentos[NOMBRES]});
                         System.out.println("Sitio 1: " + result);
                         result *= sitio2.insert(false, new String[]{EMPLEADO},
-                                new DataTable[]{fragmentos[1]});
+                                new DataTable[]{fragmentos[LLAVES]});
                         System.out.println("Sitio 2: " + result);
                     } else {
 //                        aqui se veririca la zona 3
                         Sitio sitio7 = InterfaceManager.getInterface(InterfaceManager.
                                 getInterfaceServicio(Interfaces.SITIO_7));
-                        plantel = sitio7.get(tabla, mapa);
+                        plantel = sitio7.get(tabla,null,null, mapa);
 
-                        if (plantel != null && plantel.getRowCount() != 0) {
+                        if (plantel != null && plantel.getRowCount() != NOMBRES) {
                             fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
 
-                            result = QueryManager.uniInsert(false, Interfaces.SITIO_5, new String[]{EMPLEADO}, new DataTable[]{fragmentos[1]});
+                            result = QueryManager.uniInsert(false, Interfaces.SITIO_5, new String[]{EMPLEADO}, 
+                                    new DataTable[]{fragmentos[LLAVES]});
                             System.out.println("Sitio 5: " + result);
 
-                            result *= QueryManager.uniInsert(false, Interfaces.SITIO_6, new String[]{EMPLEADO}, new DataTable[]{fragmentos[1]});
+                            result *= QueryManager.uniInsert(false, Interfaces.SITIO_6, new String[]{EMPLEADO}, 
+                                    new DataTable[]{fragmentos[LLAVES]});
                             System.out.println("Sitio 6: " + result);
 
-                            result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, new String[]{EMPLEADO}, new DataTable[]{fragmentos[1]});
+                            result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, new String[]{EMPLEADO}, 
+                                    new DataTable[]{fragmentos[NOMBRES]});
                             System.out.println("Sitio 7: " + result);
 
                         }
@@ -155,7 +164,7 @@ public class TransactionManager {
                 }
             }
 
-            if (result == 0) {
+            if (result == NOMBRES) {
                 ok = false;
                 rollback();
             } else {
@@ -181,7 +190,7 @@ public class TransactionManager {
 
         System.out.println("---------Start Plantel transaction---------- ");
 
-        short result = 0;
+        short result = NOMBRES;
         datos.rewind();
         datos.next();
 
@@ -202,7 +211,7 @@ public class TransactionManager {
                 result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, new String[]{tabla}, new DataTable[]{datos});
             }
 
-            if (result == 0) {
+            if (result == NOMBRES) {
                 ok = false;
                 rollback();
             } else {
