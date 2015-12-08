@@ -25,7 +25,7 @@ import modelo.dto.DataTable;
  */
 public class BaseDAO {
 
-    public boolean add(String tableName, DataTable data, boolean savePKs) {
+    public DataTable add(String tableName, DataTable data, boolean savePKs) {
         PreparedStatement ps = null;
         Connection conexion;
         boolean ok = true;
@@ -33,7 +33,7 @@ public class BaseDAO {
         String valuesSection = "VALUES ( ";
 
         if (data == null || data.getRowCount() == 0) {
-            return false;
+            return null;
         }
 
         try {
@@ -120,7 +120,7 @@ public class BaseDAO {
 
         System.out.println("Id 1: " + data.getValueAt(0, 0));
 
-        return ok;
+        return data;
     }
 
     public boolean update(String tableName, DataTable data, Map<String, ?> attrWhere) {

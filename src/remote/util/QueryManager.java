@@ -39,7 +39,7 @@ public class QueryManager {
      * @return 1 en caso de que todo ocurra normalmente, 0 en caso contrario.
      */
     public static short uniInsert(boolean savePKs, Interfaces interfaceSitio,
-            String[] tablas,DataTable... datos) {
+            String[] tablas, DataTable... datos) {
         short ok = 1;
         try {
             //obtener la interface
@@ -136,42 +136,6 @@ public class QueryManager {
         return transactionOk;
     }
 
-    public static synchronized short multiInsert(boolean savePKs, String tabla,
-            DataTable... datos) throws InterruptedException {
-        List<Thread> hilosInsert = new ArrayList<>();
-
-        System.out.println("savePKs: " + savePKs + " Id: " + datos[0].getValueAt(0, 0));
-
-        //Obtener todas las interfaces de sitio
-        for (Interfaces interfaceSitio : Interfaces.values()) {            
-            
-            if (interfaceSitio.equals(Interfaces.LOCALHOST)) {
-                continue;
-            }
-
-            Runnable insertar = new Runnable() {
-                @Override
-                public void run() {
-                    short resultadoActual = uniInsert(false, interfaceSitio, new String[]{tabla}, datos);
-                    transactionOk *= (short) resultadoActual;
-                }
-            };
-
-            Thread hilo = new Thread(insertar);
-            hilo.start();
-            hilosInsert.add(hilo);
-        }
-
-        for (Thread hilo : hilosInsert) {
-            hilo.join();
-        }
-
-        System.out.println("Thread principal solicitante: transactionOk = "
-                + transactionOk);
-
-        return transactionOk;
-    }
-
     public static short localInsert(boolean savePKs, String[] tablas,
             DataTable... datos) {
 
@@ -179,7 +143,7 @@ public class QueryManager {
         BaseDAO dao = new BaseDAO();
         //Insertar todas las tablas....
         for (int i = 0; i < tablas.length; i++) {
-            boolean noError = dao.add(tablas[i], datos[i], savePKs);
+            boolean noError = (dao.add(tablas[i], datos[i], savePKs) != null);
 
             if (!noError) {
                 ok = 0;
@@ -192,5 +156,5 @@ public class QueryManager {
 
         return ok;
     }
-    
+
 }

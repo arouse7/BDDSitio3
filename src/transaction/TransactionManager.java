@@ -55,7 +55,7 @@ public class TransactionManager {
             DataTable datos) {
         boolean ok = true;
 
-        System.out.println("---------Start Global transaction---------- empleado");
+        System.out.println("---------Start Empleado transaction---------- ");
 
         try {
             String[] fragDatos = {
@@ -94,10 +94,10 @@ public class TransactionManager {
 
                 result = sitio1.insert(false, new String[]{"empleado"},
                         new DataTable[]{fragmentos[0]});
-                System.out.println("Sitio 1: "+result);
+                System.out.println("Sitio 1: " + result);
                 result *= sitio2.insert(false, new String[]{"empleado"},
                         new DataTable[]{fragmentos[1]});
-                System.out.println("Sitio 2: "+result);
+                System.out.println("Sitio 2: " + result);
 
             } else {
 
@@ -113,14 +113,14 @@ public class TransactionManager {
 
                     fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
                     //este es su nodo ya no lo inserten de nuevo
-                    result = (dao.add("empleado", fragmentos[1], false)) ? (short) 1 : (short) 0;
-                    System.out.println("Sitio Local: "+result);
+                    result = (dao.add("empleado", fragmentos[1], false) != null) ? (short) 1 : (short) 0;
+                    System.out.println("Sitio Local: " + result);
                     Sitio sitio4 = InterfaceManager.getInterface(InterfaceManager.
                             getInterfaceServicio(Interfaces.SITIO_4));
 
                     result *= sitio4.insert(false, new String[]{"empleado"},
                             new DataTable[]{fragmentos[0]});
-                    System.out.println("Sitio 4: "+result);
+                    System.out.println("Sitio 4: " + result);
                 } else {
                     //revisar en los demas nodos
                     // tienen que verificar en los demas nodos en un solo sitio si se encuentra el plantel
@@ -138,10 +138,10 @@ public class TransactionManager {
 
                         result = sitio1.insert(false, new String[]{"empleado"},
                                 new DataTable[]{fragmentos[0]});
-                        System.out.println("Sitio 1: "+result);
+                        System.out.println("Sitio 1: " + result);
                         result *= sitio2.insert(false, new String[]{"empleado"},
                                 new DataTable[]{fragmentos[1]});
-                        System.out.println("Sitio 2: "+result);
+                        System.out.println("Sitio 2: " + result);
                     } else {
                         //aqui se veririca la zona 3
                         Sitio sitio7 = InterfaceManager.getInterface(InterfaceManager.
@@ -182,11 +182,59 @@ public class TransactionManager {
             ok = false;
         } catch (RemoteException ex) {
             Logger.getLogger(TransactionManager.class.getName()).log(Level.SEVERE, null, ex);
+            ok = false;
         } catch (NotBoundException ex) {
             Logger.getLogger(TransactionManager.class.getName()).log(Level.SEVERE, null, ex);
+            ok = false;
         }
 
-        System.out.println("---------End Global transaction----------");
+        System.out.println("---------End Empleado transaction----------");
+        return ok;
+    }
+
+    public static boolean insertPlantel(boolean savePKs, String tabla,
+            DataTable datos) {
+        boolean ok = true;
+
+        short result = 0;
+        datos.rewind();
+        datos.next();
+
+        try {
+            //cambien su sitio por local insert el mio está en la zona 2 
+            if (datos.getInt("zona_id") == 1) {
+                System.out.println("Zona 1");
+                result = QueryManager.uniInsert(true, Interfaces.SITIO_1, new String[]{tabla}, new DataTable[]{datos});
+                System.out.println("Sitio 1: " + result);
+                result *= QueryManager.uniInsert(false, Interfaces.SITIO_2, new String[]{tabla}, new DataTable[]{datos});
+                System.out.println("Sitio 2: " + result);
+            } else if (datos.getInt("zona_id") == 2) {
+                System.out.println("Zona 2");
+                result = QueryManager.localInsert(true, new String[]{tabla}, new DataTable[]{datos});
+                System.out.println("Sitio 3: " + result);
+                result *= QueryManager.uniInsert(false, Interfaces.SITIO_4, new String[]{tabla}, new DataTable[]{datos});
+                System.out.println("Sitio 4: " + result);
+            } else if (datos.getInt("zona_id") == 3) {
+                System.out.println("Zona 3");
+                result = QueryManager.uniInsert(true, Interfaces.SITIO_5, new String[]{tabla}, new DataTable[]{datos});
+                System.out.println("Sitio 5: " + result);
+                result *= QueryManager.uniInsert(false, Interfaces.SITIO_6, new String[]{tabla}, new DataTable[]{datos});
+                System.out.println("Sitio 6: " + result);
+                result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, new String[]{tabla}, new DataTable[]{datos});
+                System.out.println("Sitio 7: " + result);
+            }
+
+            if (result == 0) {
+                ok = false;
+                rollback();
+            } else {
+                commit();
+            }
+
+        } catch (InterruptedException ex) {
+            Logger.getLogger(TransactionManager.class.getName()).log(Level.SEVERE, null, ex);
+            ok = false;
+        }
         return ok;
     }
 

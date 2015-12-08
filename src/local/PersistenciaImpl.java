@@ -35,26 +35,36 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
         List<String> tablasEmpleado = new ArrayList<>();
         List<DataTable> dtEmpleado = new ArrayList<>();
 
+        List<String> tablasPlantel = new ArrayList<>();
+        List<DataTable> dtPlantel = new ArrayList<>();
+
         //Insertar todas las tablas....
         for (int i = 0, j = 0; i < tablas.length; i++) {
-            if (!tablas[i].equalsIgnoreCase("empleado")
-                    && !tablas[i].equalsIgnoreCase("plantel")
-                    && !tablas[i].equalsIgnoreCase("implementacion_evento_empleado")) {
-
-                tablasReplicadas.add(tablas[i]);
-                dtReplicados.add(datos[i]);
-
-            } else if (tablas[i].equalsIgnoreCase("empleado")) {
+//            if (!tablas[i].equalsIgnoreCase("empleado")
+//                    && !tablas[i].equalsIgnoreCase("plantel")
+//                    && !tablas[i].equalsIgnoreCase("implementacion_evento_empleado")) {
+//                          tablasReplicadas.add(tablas[i]);
+//                          dtReplicados.add(datos[i]);
+//            } else 
+            if (tablas[i].equalsIgnoreCase("empleado")) {
                 tablasEmpleado.add(tablas[i]);
                 dtEmpleado.add(datos[i]);
+            } else if (tablas[i].equalsIgnoreCase(("plantel"))) {
+                tablasPlantel.add(tablas[i]);
+                dtPlantel.add(datos[i]);
+            } else if (tablas[i].equalsIgnoreCase("implementacion_evento_empleado")) {
+
+            } else {
+                tablasReplicadas.add(tablas[i]);
+                dtReplicados.add(datos[i]);
             }
+
         }
 
         if (tablasEmpleado.size() > 0) {
-            System.out.println("tabla de empleado");
+            System.out.println("insert de empleado");
             dtEmpleado.get(0).rewind();
-            
-            System.out.println();
+
             ok = TransactionManager.insertEmpleado(true,
                     tablasEmpleado.get(0), dtEmpleado.get(0));
 
@@ -62,7 +72,14 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
                     + " tablas, resultado: "
                     + ok);
 
+        } else if (tablasPlantel.size() > 0) {
+            System.out.println("insert de plantel");
+            dtEmpleado.get(0).rewind();
+            ok = true;
+            
+            
         } else {
+            //tablas replicadas
             String[] tablasReplicadasArr = new String[tablasReplicadas.size()];
             DataTable[] dtReplicadosArr = new DataTable[dtReplicados.size()];
 

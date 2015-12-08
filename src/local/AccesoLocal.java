@@ -30,7 +30,7 @@ public class AccesoLocal extends UnicastRemoteObject implements Sitio3Int {
         BaseDAO dao = new BaseDAO();
         //Insertar todas las tablas....
         for (int i = 0; i < tablas.length; i++) {
-            boolean noError = dao.add(tablas[i], datos[i], savePKs);
+            boolean noError = (dao.add(tablas[i], datos[i], savePKs) != null);
 
             if (!noError) {
                 ok = 0;
