@@ -74,10 +74,15 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
 
         } else if (tablasPlantel.size() > 0) {
             System.out.println("insert de plantel");
-            dtEmpleado.get(0).rewind();
-            ok = true;
+            dtPlantel.get(0).rewind();
+
+            ok = TransactionManager.insertPlantel(false, tablasPlantel.get(0),
+                    dtPlantel.get(0));
             
-            
+            System.out.println("Inserción de plantel: " + tablas.length
+                    + " tablas, resultado: "
+                    + ok);
+
         } else {
             //tablas replicadas
             String[] tablasReplicadasArr = new String[tablasReplicadas.size()];
