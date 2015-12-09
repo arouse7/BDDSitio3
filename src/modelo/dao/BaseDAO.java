@@ -10,9 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -28,7 +26,6 @@ public class BaseDAO {
     public DataTable add(String tableName, DataTable data, boolean savePKs) {
         PreparedStatement ps = null;
         Connection conexion;
-        boolean ok = true;
         String insertQuery = "INSERT INTO " + tableName + "( ";
         String valuesSection = "VALUES ( ";
 
@@ -105,20 +102,18 @@ public class BaseDAO {
             if (savePKs) {
                 data.rewind();
             }
-
+            System.out.println("Id 1: " + data.getValueAt(0, 0));
             //ConnectionManager.commit();
         } catch (SQLException ex) {
             ConnectionManager.rollback();
             ConnectionManager.cerrar();
-            ok = false;
+            data = null;
             Logger.getLogger(BaseDAO.class.getName()).log(Level.SEVERE, null, ex);
 
         } finally {
             ConnectionManager.cerrar(ps);
             //ConnectionManager.cerrarTodo(ps, null);
         }
-
-        System.out.println("Id 1: " + data.getValueAt(0, 0));
 
         return data;
     }
@@ -293,7 +288,7 @@ public class BaseDAO {
         String selectQuery = "SELECT ";
 
         try {
-        //Crear query
+            //Crear query
             //Project columns...
             if (projectColumns != null && projectColumns.length > 0
                     && projectAliases != null && projectAliases.length == projectColumns.length) {

@@ -31,21 +31,24 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
 
         if (tabla.equalsIgnoreCase("empleado")) {
             datos.rewind();
-            ok = TransactionManager.insertEmpleado(true, tabla, datos);
+            ok = TransactionManager.insertEmpleado(datos);
+            System.out.println("Inserción de empleado: " + tabla + ", resultado: "
+                    + ok);
 
         } else if (tabla.equalsIgnoreCase(("plantel"))) {
             datos.rewind();
             ok = TransactionManager.insertPlantel(false, tabla, datos);
+            System.out.println("Inserción de plantel: " + tabla + ", resultado: "
+                    + ok);
 
         } else if (tabla.equalsIgnoreCase("implementacion_evento_empleado")) {
             ok = false;
         } else {
             System.out.println("insert replicado");
             ok = TransactionManager.insertReplicado(true, tabla, datos);
+            System.out.println("Inserción replicado: " + tabla + ", resultado: "
+                    + ok);
         }
-
-        System.out.println("Inserción de empleado: " + tabla + ", resultado: "
-                + ok);
 
         return ok;
     }

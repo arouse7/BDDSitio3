@@ -10,6 +10,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import modelo.dao.BaseDAO;
@@ -106,7 +107,7 @@ public class QueryManager {
 //                    System.out.println("Thread de inserción a la interface: " + 
 //                            interfaceSitio + ", resultadoTodos = " + transactionOk);
 
-                    short resultadoActual = uniInsert(false, interfaceSitio, tabla, datos)
+                    short resultadoActual = uniInsert(true, interfaceSitio, tabla, datos)
                             != null ? (short) 1 : (short) 0;
 
 //                    System.out.println("Thread de inserción a la interface: " + 
@@ -148,6 +149,35 @@ public class QueryManager {
         System.out.println("Inserción de " + tabla + " , resultado: "
                 + ok);
 
+        return ok;
+    }
+
+    public static DataTable uniGet(Interfaces interfaceSitio, String tableName,
+            String[] projectColumns, String[] projectAliases, Map<String, ?> attrWhere) {
+        DataTable ok = null;
+        try {
+            if (interfaceSitio == Interfaces.LOCALHOST) {
+                ok = new BaseDAO().get(tableName, projectColumns, projectAliases, attrWhere);
+                System.out.println("Insert en el sitio: "
+                        + interfaceSitio + ", resultado = " + ok);
+            } else {
+                Sitio sitio = InterfaceManager.getInterface(
+                        InterfaceManager.getInterfaceServicio(interfaceSitio));
+
+                //insertar los datos
+                if (sitio != null) {
+
+                    ok = sitio.get(tableName, projectColumns, projectAliases, attrWhere);
+
+                    System.out.println("Insert en el sitio: "
+                            + interfaceSitio + ", resultado = " + ok);
+                }
+            }
+
+        } catch (RemoteException | NotBoundException ex) {
+            Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
+            ok = null;
+        }
         return ok;
     }
 
