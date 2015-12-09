@@ -241,7 +241,7 @@ public class TransactionManager {
         ConnectionManager.cerrar();
 
         //Obtener todas las interfaces de sitio
-        for (InterfaceManager.Interfaces interfaceSitio : InterfaceManager.Interfaces.values()) {
+        for (InterfaceManager.Interfaces interfaceSitio : InterfaceManager.getInterfacesRegistradas()) {
 
             if (interfaceSitio.equals(Interfaces.LOCALHOST)) {
                 continue;
@@ -286,7 +286,7 @@ public class TransactionManager {
         ConnectionManager.cerrar();
 
         //Obtener todas las interfaces de sitio
-        for (InterfaceManager.Interfaces interfaceSitio : InterfaceManager.Interfaces.values()) {
+        for (InterfaceManager.Interfaces interfaceSitio : InterfaceManager.getInterfacesRegistradas()) {
 
             if (interfaceSitio.equals(Interfaces.LOCALHOST)) {
                 continue;

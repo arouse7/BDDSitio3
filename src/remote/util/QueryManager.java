@@ -92,7 +92,7 @@ public class QueryManager {
         System.out.println("savePKs: " + savePKs + " Id: " + datos.getValueAt(0, 0));
 
         //Obtener todas las interfaces de sitio
-        for (Interfaces interfaceSitio : Interfaces.values()) {
+        for (Interfaces interfaceSitio : InterfaceManager.getInterfacesRegistradas()) {
 
             if (interfaceSitio.equals(Interfaces.LOCALHOST)) {
                 continue;
