@@ -565,7 +565,7 @@ public class DataTable extends AbstractTableModel {
      */
     public static DataTable combinarFragV(DataTable tabla1, DataTable tabla2, String nombreColumnaID) {
 
-        if (tabla1 == null && tabla2 == null) {
+        if (tabla1 == null || tabla2 == null) {
             return null;
         }
         
