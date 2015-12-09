@@ -28,8 +28,10 @@ import remote.util.QueryManager;
 public class TransactionManager {
 
     private static final String EMPLEADO = "empleado";
-    private static final int LLAVES = 1;
-    private static final int NOMBRES = 0;
+    private static final short BIEN = 1;
+    private static final int LLAVES = BIEN;
+    private static final short MAL = 0;
+    private static final int NOMBRES = MAL;
 
     public static boolean insertReplicado(boolean savePKs, String tabla,
             DataTable datos) {
@@ -39,7 +41,7 @@ public class TransactionManager {
         try {
             short result = QueryManager.broadInsert(savePKs, tabla, datos);
 
-            if (result == 0) {
+            if (result == MAL) {
                 ok = false;
                 rollback();
             } else {
@@ -79,7 +81,7 @@ public class TransactionManager {
                 "direccion_id"
             };
 
-            short result = LLAVES;
+            short result = MAL;
             DataTable[] fragmentos;
             datos.rewind();
             datos.next();
@@ -92,10 +94,10 @@ public class TransactionManager {
                 fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
 
                 result = QueryManager.uniInsert(false, Interfaces.SITIO_1, EMPLEADO,
-                        fragmentos[NOMBRES]) != null ? (short) 1 : (short) 0;
+                        fragmentos[NOMBRES]) != null ? BIEN : MAL;
                 System.out.println("Sitio 1: " + result);
                 result *= QueryManager.uniInsert(false, Interfaces.SITIO_2, EMPLEADO,
-                        fragmentos[LLAVES]) != null ? (short) 1 : (short) 0;
+                        fragmentos[LLAVES]) != null ? BIEN : MAL;
                 System.out.println("Sitio 2: " + result);
             } else {
 
@@ -111,11 +113,12 @@ public class TransactionManager {
 
                     fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
 //                    //este es su nodo ya no lo inserten de nuevo
-                    result = (dao.add(EMPLEADO, fragmentos[LLAVES], false) != null) ? (short) LLAVES : (short) NOMBRES;
+                    result = (dao.add(EMPLEADO, fragmentos[LLAVES], false) != null)
+                            ? BIEN : MAL;
                     System.out.println("Sitio Local: " + result);
 
                     result *= QueryManager.uniInsert(false, Interfaces.SITIO_4,
-                            EMPLEADO, fragmentos[NOMBRES]) != null ? (short) 1 : (short) 0;
+                            EMPLEADO, fragmentos[NOMBRES]) != null ? BIEN : MAL;
                     System.out.println("Sitio 4: " + result);
 
                 } else {
@@ -133,10 +136,10 @@ public class TransactionManager {
                         fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
 
                         result = QueryManager.uniInsert(false, Interfaces.SITIO_1, EMPLEADO,
-                                fragmentos[NOMBRES]) != null ? (short) 1 : (short) 0;
+                                fragmentos[NOMBRES]) != null ? BIEN : MAL;
                         System.out.println("Sitio 1: " + result);
                         result *= sitio2.insert(false, EMPLEADO,
-                                fragmentos[LLAVES]) != null ? (short) 1 : (short) 0;
+                                fragmentos[LLAVES]) != null ? BIEN : MAL;
                         System.out.println("Sitio 2: " + result);
                     } else {
 //                        aqui se veririca la zona 3
@@ -148,15 +151,15 @@ public class TransactionManager {
                             fragmentos = datos.fragmentarVertical(fragDatos, fragLlaves);
 
                             result = QueryManager.uniInsert(false, Interfaces.SITIO_5, EMPLEADO,
-                                    fragmentos[LLAVES]) != null ? (short) 1 : (short) 0;
+                                    fragmentos[LLAVES]) != null ? BIEN : MAL;
                             System.out.println("Sitio 5: " + result);
 
                             result *= QueryManager.uniInsert(false, Interfaces.SITIO_6, EMPLEADO,
-                                    fragmentos[LLAVES]) != null ? (short) 1 : (short) 0;
+                                    fragmentos[LLAVES]) != null ? BIEN : MAL;
                             System.out.println("Sitio 6: " + result);
 
                             result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, EMPLEADO,
-                                    fragmentos[NOMBRES]) != null ? (short) 1 : (short) 0;
+                                    fragmentos[NOMBRES]) != null ? BIEN : MAL;
                             System.out.println("Sitio 7: " + result);
 
                         }
@@ -164,7 +167,7 @@ public class TransactionManager {
                 }
             }
 
-            if (result == NOMBRES) {
+            if (result == 0) {
                 ok = false;
                 rollback();
             } else {
@@ -190,7 +193,7 @@ public class TransactionManager {
 
         System.out.println("---------Start Plantel transaction---------- ");
 
-        short result = 0;
+        short result = MAL;
         datos.rewind();
         datos.next();
 
@@ -200,26 +203,26 @@ public class TransactionManager {
             if (datos.getInt("zona_id") == 1) {
                 System.out.println("Zona 1");
                 tablaResult = QueryManager.uniInsert(true, Interfaces.SITIO_1, tabla, datos);
-                result = tablaResult != null ? (short) 1 : (short) 0;
+                result = tablaResult != null ? BIEN : MAL;
                 result *= QueryManager.uniInsert(false, Interfaces.SITIO_2, tabla, tablaResult)
-                        != null ? (short) 1 : (short) 0;
+                        != null ? BIEN : MAL;
             } else if (datos.getInt("zona_id") == 2) {
                 System.out.println("Zona 2");
                 tablaResult = QueryManager.localInsert(true, tabla, datos);
-                result = tablaResult != null ? (short) 1 : (short) 0;
+                result = tablaResult != null ? BIEN : MAL;
                 result *= QueryManager.uniInsert(false, Interfaces.SITIO_4, tabla, datos)
-                        != null ? (short) 1 : (short) 0;
+                        != null ? BIEN : MAL;
             } else if (datos.getInt("zona_id") == 3) {
                 System.out.println("Zona 3");
                 tablaResult = QueryManager.uniInsert(true, Interfaces.SITIO_5, tabla, datos);
-                result = tablaResult != null ? (short) 1 : (short) 0;
+                result = tablaResult != null ? BIEN : MAL;
                 result *= QueryManager.uniInsert(false, Interfaces.SITIO_6, tabla, datos)
-                        != null ? (short) 1 : (short) 0;
+                        != null ? BIEN : MAL;
                 result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, tabla, datos)
-                        != null ? (short) 1 : (short) 0;
+                        != null ? BIEN : MAL;
             }
 
-            if (result == 0) {
+            if (result == MAL) {
                 ok = false;
                 rollback();
             } else {
