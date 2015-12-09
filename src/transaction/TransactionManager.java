@@ -27,6 +27,7 @@ import remote.util.QueryManager;
  */
 public class TransactionManager {
 
+    private static final String COLUMNA_ID_PLANTEL = "id";
     private static final String EMPLEADO = "empleado";
     private static final String PLANTEL = "plantel";
     private static final short BIEN = 1;
@@ -89,7 +90,7 @@ public class TransactionManager {
         } else {
 
             Map<String, Object> condicion = new HashMap<>();
-            condicion.put("id", datos.getInt("plantel_id"));
+            condicion.put(COLUMNA_ID_PLANTEL, datos.getInt("plantel_id"));
 
             DataTable plantel = QueryManager.uniGet(Interfaces.LOCALHOST,
                     PLANTEL, null, null, condicion);
@@ -98,7 +99,6 @@ public class TransactionManager {
             // cambiar por sus nodos el nombre de la variable de sitio y la interface
             if (plantel != null && plantel.getRowCount() != 0) {
                 //este es su nodo ya no lo inserten de nuevo
-
                 result = QueryManager.localInsert(false, EMPLEADO, fragmentos[LLAVES])
                         != null ? BIEN : MAL;
 
@@ -166,6 +166,7 @@ public class TransactionManager {
         if (result == BIEN) {
             commit(inter);
         } else {
+            ok = false;
             rollback(inter);
         }
 
@@ -182,15 +183,25 @@ public class TransactionManager {
         short result = MAL;
         datos.rewind();
         datos.next();
-        DataTable tablaResult;
+//        DataTable tablaResult;
         List<Interfaces> inter = new ArrayList<>();
+
+        Integer idLocal = QueryManager.getMaxId(Interfaces.LOCALHOST, tabla, COLUMNA_ID_PLANTEL);
+        Integer idZona1 = QueryManager.getMaxId(Interfaces.SITIO_1, tabla, COLUMNA_ID_PLANTEL);
+        Integer idZona3 = QueryManager.getMaxId(Interfaces.SITIO_7, tabla, COLUMNA_ID_PLANTEL);
+        Integer mayor = (idZona1 > idZona3) ? idZona1 : idZona3;
+        mayor = (mayor > idLocal) ? mayor : idLocal;
+
+        datos.rewind();
+        datos.next();
+        datos.setObject(COLUMNA_ID_PLANTEL, ++mayor);
 
         if (datos.getInt("zona_id") == 1) {
 
             System.out.println("Zona 1");
-            tablaResult = QueryManager.uniInsert(true, Interfaces.SITIO_2, tabla, datos);
-            result = tablaResult != null ? BIEN : MAL;
-            result *= QueryManager.uniInsert(false, Interfaces.SITIO_1, tabla, tablaResult)
+            result = QueryManager.uniInsert(false, Interfaces.SITIO_2, tabla, datos)
+                    != null ? BIEN : MAL;
+            result *= QueryManager.uniInsert(false, Interfaces.SITIO_1, tabla, datos)
                     != null ? BIEN : MAL;
 
             inter.add(Interfaces.SITIO_1);
@@ -199,9 +210,9 @@ public class TransactionManager {
         } else if (datos.getInt("zona_id") == 2) {
 
             System.out.println("Zona 2");
-            tablaResult = QueryManager.localInsert(true, tabla, datos);
-            result = tablaResult != null ? BIEN : MAL;
-            result *= QueryManager.uniInsert(false, Interfaces.SITIO_4, tabla, tablaResult)
+            result = QueryManager.localInsert(false, tabla, datos)
+                    != null ? BIEN : MAL;
+            result *= QueryManager.uniInsert(false, Interfaces.SITIO_4, tabla, datos)
                     != null ? BIEN : MAL;
 
             inter.add(Interfaces.LOCALHOST);
@@ -210,17 +221,53 @@ public class TransactionManager {
         } else if (datos.getInt("zona_id") == 3) {
 
             System.out.println("Zona 3");
-            tablaResult = QueryManager.uniInsert(true, Interfaces.SITIO_5, tabla, datos);
-            result = tablaResult != null ? BIEN : MAL;
-            result *= QueryManager.uniInsert(false, Interfaces.SITIO_6, tabla, tablaResult)
+            result = QueryManager.uniInsert(false, Interfaces.SITIO_5, tabla, datos)
                     != null ? BIEN : MAL;
-            result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, tabla, tablaResult)
+            result *= QueryManager.uniInsert(false, Interfaces.SITIO_6, tabla, datos)
+                    != null ? BIEN : MAL;
+            result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, tabla, datos)
                     != null ? BIEN : MAL;
 
             inter.add(Interfaces.SITIO_5);
             inter.add(Interfaces.SITIO_6);
             inter.add(Interfaces.SITIO_7);
         }
+//        if (datos.getInt("zona_id") == 1) {
+//
+//            System.out.println("Zona 1");
+//            tablaResult = QueryManager.uniInsert(true, Interfaces.SITIO_2, tabla, datos);
+//            result = tablaResult != null ? BIEN : MAL;
+//            result *= QueryManager.uniInsert(false, Interfaces.SITIO_1, tabla, tablaResult)
+//                    != null ? BIEN : MAL;
+//
+//            inter.add(Interfaces.SITIO_1);
+//            inter.add(Interfaces.SITIO_2);
+//
+//        } else if (datos.getInt("zona_id") == 2) {
+//
+//            System.out.println("Zona 2");
+//            tablaResult = QueryManager.localInsert(true, tabla, datos);
+//            result = tablaResult != null ? BIEN : MAL;
+//            result *= QueryManager.uniInsert(false, Interfaces.SITIO_4, tabla, tablaResult)
+//                    != null ? BIEN : MAL;
+//
+//            inter.add(Interfaces.LOCALHOST);
+//            inter.add(Interfaces.SITIO_4);
+//
+//        } else if (datos.getInt("zona_id") == 3) {
+//
+//            System.out.println("Zona 3");
+//            tablaResult = QueryManager.uniInsert(true, Interfaces.SITIO_5, tabla, datos);
+//            result = tablaResult != null ? BIEN : MAL;
+//            result *= QueryManager.uniInsert(false, Interfaces.SITIO_6, tabla, tablaResult)
+//                    != null ? BIEN : MAL;
+//            result *= QueryManager.uniInsert(false, Interfaces.SITIO_7, tabla, tablaResult)
+//                    != null ? BIEN : MAL;
+//
+//            inter.add(Interfaces.SITIO_5);
+//            inter.add(Interfaces.SITIO_6);
+//            inter.add(Interfaces.SITIO_7);
+//        }
 
         if (result == MAL) {
             ok = false;
@@ -230,6 +277,54 @@ public class TransactionManager {
         }
 
         System.out.println("---------End Plantel transaction----------");
+        return ok;
+    }
+
+    public static boolean updateReplicado(String tabla, DataTable datos,
+            Map<String, ?> attrWhere) {
+
+        boolean ok = true;
+
+        System.out.println("---------Start Global transaction----------");
+        try {
+            short result = QueryManager.broadUpdate(tabla, datos, attrWhere);
+
+            if (result == 0) {
+                ok = false;
+                rollback();
+            } else {
+                commit();
+            }
+
+        } catch (InterruptedException ex) {
+            Logger.getLogger(TransactionManager.class.getName()).log(Level.SEVERE, null, ex);
+            ok = false;
+        }
+
+        System.out.println("---------End Global transaction----------");
+        return ok;
+    }
+
+    public static boolean deleteReplicado(String tabla, Map<String, ?> attrWhere) {
+        boolean ok = true;
+
+        System.out.println("---------Start Global transaction----------");
+        try {
+            short result = QueryManager.broadDelete(tabla, attrWhere);
+
+            if (result == 0) {
+                ok = false;
+                rollback();
+            } else {
+                commit();
+            }
+
+        } catch (InterruptedException ex) {
+            Logger.getLogger(TransactionManager.class.getName()).log(Level.SEVERE, null, ex);
+            ok = false;
+        }
+
+        System.out.println("---------End Global transaction----------");
         return ok;
     }
 
