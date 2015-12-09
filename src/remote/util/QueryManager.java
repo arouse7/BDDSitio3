@@ -32,15 +32,15 @@ public class QueryManager {
      *
      * @param savePKs guardar las llaves primarias generadas
      * @param interfaceSitio la interface del sitio al que se desea insertar
-     * @param tablas el arreglo de nombres de tablas donde se insertará
+     * @param tabla el arreglo de nombres de tablas donde se insertará
      * @param datos el arreglo de DataTables que se desean insertar en el orden
      * en el que están los nombres de las tablas en el arreglo
      *
      * @return 1 en caso de que todo ocurra normalmente, 0 en caso contrario.
      */
-    public static short uniInsert(boolean savePKs, Interfaces interfaceSitio,
-            String[] tablas, DataTable... datos) {
-        short ok = 1;
+    public static DataTable uniInsert(boolean savePKs, Interfaces interfaceSitio,
+            String tabla, DataTable datos) {
+        DataTable ok = null;
         try {
             //obtener la interface
             Sitio sitio = InterfaceManager.getInterface(
@@ -48,7 +48,7 @@ public class QueryManager {
 
             //insertar los datos
             if (sitio != null) {
-                ok = sitio.insert(savePKs, tablas, datos);
+                ok = sitio.insert(savePKs, tabla, datos);
 
                 System.out.println("Insert en el sitio: "
                         + interfaceSitio + ", resultado = " + ok);
@@ -56,10 +56,10 @@ public class QueryManager {
 
         } catch (ConnectException ex) {
             Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
-            ok = 0;
+            ok = null;
         } catch (RemoteException | NotBoundException ex) {
             Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
-            ok = 0;
+            ok = null;
         }
 
         return ok;
@@ -78,17 +78,17 @@ public class QueryManager {
      * @throws InterruptedException en caso de que ocurra un error con los
      * threads
      */
-    public static synchronized short broadInsert(boolean savePKs, String[] tablas,
-            DataTable... datos)
+    public static synchronized short broadInsert(boolean savePKs, String tabla,
+            DataTable datos)
             throws InterruptedException {
         List<Thread> hilosInsert = new ArrayList<>();
 
         //TRANSACTION_OK.set((short)1);
-        transactionOk = localInsert(savePKs, tablas, datos);
+        transactionOk = (localInsert(savePKs, tabla, datos) != null ? (short) 1 : (short) 0);
 
 //        System.out.println("Thread principal solicitante: transacionOk = 1");
 //        uniInsert(savePKs, Interfaces.LOCALHOST, tablas, datos);
-        System.out.println("savePKs: " + savePKs + " Id: " + datos[0].getValueAt(0, 0));
+        System.out.println("savePKs: " + savePKs + " Id: " + datos.getValueAt(0, 0));
 
         //Obtener todas las interfaces de sitio
         for (Interfaces interfaceSitio : Interfaces.values()) {
@@ -106,7 +106,8 @@ public class QueryManager {
 //                    System.out.println("Thread de inserción a la interface: " + 
 //                            interfaceSitio + ", resultadoTodos = " + transactionOk);
 
-                    short resultadoActual = uniInsert(false, interfaceSitio, tablas, datos);
+                    short resultadoActual = uniInsert(false, interfaceSitio, tabla, datos)
+                            != null ? (short) 1 : (short) 0;
 
 //                    System.out.println("Thread de inserción a la interface: " + 
 //                            interfaceSitio + ", resultadoActual = " + resultadoActual);
@@ -136,22 +137,15 @@ public class QueryManager {
         return transactionOk;
     }
 
-    public static short localInsert(boolean savePKs, String[] tablas,
-            DataTable... datos) {
+    public static DataTable localInsert(boolean savePKs, String tabla,
+            DataTable datos) {
 
-        short ok = 1;
+        DataTable ok;
         BaseDAO dao = new BaseDAO();
         //Insertar todas las tablas....
-        for (int i = 0; i < tablas.length; i++) {
-            boolean noError = (dao.add(tablas[i], datos[i], savePKs) != null);
+        ok = dao.add(tabla, datos, savePKs);
 
-            if (!noError) {
-                ok = 0;
-                break;
-            }
-        }
-
-        System.out.println("Inserción de " + tablas.length + " tablas, resultado: "
+        System.out.println("Inserción de " + tabla + " , resultado: "
                 + ok);
 
         return ok;

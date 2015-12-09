@@ -26,77 +26,26 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
     }
 
     @Override
-    public boolean insert(String[] tablas, DataTable... datos) throws RemoteException {
+    public boolean insert(String tabla, DataTable datos) throws RemoteException {
         boolean ok;
 
-        //Tablas y datatables
-        List<String> tablasReplicadas = new ArrayList<>();
-        List<DataTable> dtReplicados = new ArrayList<>();
+        if (tabla.equalsIgnoreCase("empleado")) {
+            datos.rewind();
+            ok = TransactionManager.insertEmpleado(true, tabla, datos);
 
-        List<String> tablasEmpleado = new ArrayList<>();
-        List<DataTable> dtEmpleado = new ArrayList<>();
+        } else if (tabla.equalsIgnoreCase(("plantel"))) {
+            datos.rewind();
+            ok = TransactionManager.insertPlantel(false, tabla, datos);
 
-        List<String> tablasPlantel = new ArrayList<>();
-        List<DataTable> dtPlantel = new ArrayList<>();
-
-        //Insertar todas las tablas....
-        for (int i = 0, j = 0; i < tablas.length; i++) {
-//            if (!tablas[i].equalsIgnoreCase("empleado")
-//                    && !tablas[i].equalsIgnoreCase("plantel")
-//                    && !tablas[i].equalsIgnoreCase("implementacion_evento_empleado")) {
-//                          tablasReplicadas.add(tablas[i]);
-//                          dtReplicados.add(datos[i]);
-//            } else 
-            if (tablas[i].equalsIgnoreCase("empleado")) {
-                tablasEmpleado.add(tablas[i]);
-                dtEmpleado.add(datos[i]);
-            } else if (tablas[i].equalsIgnoreCase(("plantel"))) {
-                tablasPlantel.add(tablas[i]);
-                dtPlantel.add(datos[i]);
-            } else if (tablas[i].equalsIgnoreCase("implementacion_evento_empleado")) {
-
-            } else {
-                tablasReplicadas.add(tablas[i]);
-                dtReplicados.add(datos[i]);
-            }
-
-        }
-
-        if (tablasEmpleado.size() > 0) {
-            System.out.println("insert de empleado");
-            dtEmpleado.get(0).rewind();
-
-            ok = TransactionManager.insertEmpleado(true,
-                    tablasEmpleado.get(0), dtEmpleado.get(0));
-
-            System.out.println("Inserción de empleado: " + tablas.length
-                    + " tablas, resultado: "
-                    + ok);
-
-        } else if (tablasPlantel.size() > 0) {
-            System.out.println("insert de plantel");
-            dtPlantel.get(0).rewind();
-
-            ok = TransactionManager.insertPlantel(false, tablasPlantel.get(0),
-                    dtPlantel.get(0));
-
-            System.out.println("Inserción de plantel: " + tablas.length
-                    + " tablas, resultado: "
-                    + ok);
-
+        } else if (tabla.equalsIgnoreCase("implementacion_evento_empleado")) {
+            ok = false;
         } else {
-            //tablas replicadas
-            String[] tablasReplicadasArr = new String[tablasReplicadas.size()];
-            DataTable[] dtReplicadosArr = new DataTable[dtReplicados.size()];
-
-            ok = TransactionManager.insertReplicado(true,
-                    tablasReplicadas.toArray(tablasReplicadasArr),
-                    dtReplicados.toArray(dtReplicadosArr));
-
-            //Mandar las tablas a insertar a todos los nodos
-            System.out.println("Inserción de " + tablas.length + " tablas, resultado: "
-                    + ok);
+            System.out.println("insert replicado");
+            ok = TransactionManager.insertReplicado(true, tabla, datos);
         }
+
+        System.out.println("Inserción de empleado: " + tabla + ", resultado: "
+                + ok);
 
         return ok;
     }
