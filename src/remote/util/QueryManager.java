@@ -9,7 +9,6 @@ import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -159,19 +158,13 @@ public class QueryManager {
         try {
             if (interfaceSitio == Interfaces.LOCALHOST) {
                 ok = new BaseDAO().get(tableName, projectColumns, projectAliases, attrWhere);
-                System.out.println("Insert en el sitio: "
-                        + interfaceSitio + ", resultado = " + ok);
             } else {
                 Sitio sitio = InterfaceManager.getInterface(
                         InterfaceManager.getInterfaceServicio(interfaceSitio));
 
-                //insertar los datos
+                
                 if (sitio != null) {
-
                     ok = sitio.get(tableName, projectColumns, projectAliases, attrWhere);
-
-                    System.out.println("Insert en el sitio: "
-                            + interfaceSitio + ", resultado = " + ok);
                 }
             }
 
@@ -179,6 +172,8 @@ public class QueryManager {
             Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
             ok = null;
         }
+        
+        System.out.println("Consulta en el sitio: " + interfaceSitio + ", resultado = " + ok );
         return ok;
     }
 
@@ -198,7 +193,7 @@ public class QueryManager {
             ok = tablaID.getInt(columnaID);
         } catch (RemoteException | NotBoundException | NullPointerException ex) {
             Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
-            ok = null;
+            ok = -1;
         }
         return ok;
 

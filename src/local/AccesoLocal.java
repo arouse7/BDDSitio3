@@ -12,6 +12,7 @@ import modelo.dao.BaseDAO;
 import modelo.util.ConnectionManager;
 import modelo.dto.DataTable;
 import remote.Sitio3Int;
+import remote.util.InterfaceManager;
 
 /**
  *
@@ -40,21 +41,21 @@ public class AccesoLocal extends UnicastRemoteObject implements Sitio3Int {
     @Override
     public boolean update(String tabla, DataTable datos, Map<String, ?> attrWhere)
             throws RemoteException {
-        
+
         boolean ok = new BaseDAO().update(tabla, datos, attrWhere);
-        
+
         System.out.println("Se actualizó la tabla: " + tabla + " resultado: " + ok);
-        
+
         return ok;
     }
 
     @Override
     public boolean delete(String tabla, Map<String, ?> attrWhere) throws RemoteException {
-        
+
         boolean ok = new BaseDAO().delete(tabla, attrWhere);
-        
+
         System.out.println("Se eliminó de la tabla: " + tabla + " resultado: " + ok);
-        
+
         return ok;
     }
 
@@ -79,6 +80,17 @@ public class AccesoLocal extends UnicastRemoteObject implements Sitio3Int {
         ConnectionManager.cerrar();
 
         return ok;
+    }
+
+    @Override
+    public void setConexionesSitos(Map<InterfaceManager.Interfaces, Object[]> conexiones)
+            throws RemoteException {
+
+        InterfaceManager.setIntefacesConexion(conexiones);
+        InterfaceManager.conexionRemota = true;
+
+        System.out.println("Se obtuvieron " + InterfaceManager
+                .getInterfacesConexion().size() + " interfaces");
     }
 
     @Override
