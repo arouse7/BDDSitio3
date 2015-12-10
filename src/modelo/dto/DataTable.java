@@ -576,7 +576,11 @@ public class DataTable extends AbstractTableModel {
             return null;
         }
         boolean ok;
+        tabla1.rewind();
+        tabla2.rewind();
         for (int i = 0; i < tabla1.getRowCount(); i++) {
+            tabla1.next();
+            tabla2.next();
             ok = tabla1.getObject(nombreColumnaID).equals(tabla2.getObject(nombreColumnaID));
             if (!ok) {
                 return null;
