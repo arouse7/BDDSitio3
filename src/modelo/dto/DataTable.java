@@ -572,7 +572,7 @@ public class DataTable extends AbstractTableModel {
         int filas = tabla1.getRowCount();
         int columnas = tabla1.getColumnCount() + tabla2.getColumnCount() - 1;
 
-        if (filas % 2 != 0) {
+        if (filas % 2 != 0 && filas != 1) {
             return null;
         }
         boolean ok;

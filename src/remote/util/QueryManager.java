@@ -190,7 +190,7 @@ public class QueryManager {
                         .get(tabla, new String[]{"MAX(" + columnaID + ")"}, new String[]{"id"}, null);
             }
             tablaID.next();
-            ok = tablaID.getInt(columnaID);
+            ok = tablaID.getInt("id");
         } catch (RemoteException | NotBoundException | NullPointerException ex) {
             Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
             ok = -1;

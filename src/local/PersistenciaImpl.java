@@ -35,7 +35,7 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
 
         } else if (tabla.equalsIgnoreCase(("plantel"))) {
             datos.rewind();
-            ok = TransactionManager.insertPlantel(false, tabla, datos);
+            ok = TransactionManager.insertPlantel(datos);
             System.out.println("Inserción de plantel: " + tabla + ", resultado: "
                     + ok);
 
@@ -83,7 +83,7 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
     @Override
     public boolean delete(String tabla, Map<String, ?> attrWhere) throws RemoteException {
         boolean ok = false;
-        
+
         if (tabla.equalsIgnoreCase("empleado")) {
             //ok = TransactionManager.insertEmpleado(true, tabla, datos);
         } else if (tabla.equalsIgnoreCase(("plantel"))) {
@@ -93,7 +93,7 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
         } else {
             ok = TransactionManager.deleteReplicado(tabla, attrWhere);
         }
-        
+
         return ok;
     }
 
@@ -108,6 +108,14 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
                 && !tabla.equalsIgnoreCase("implementacion_evento_empleado")) {
             //Todas son consultas locales....
             dt = new BaseDAO().get(tabla, columnas, aliases, attrWhere);
+        } else if (tabla.equalsIgnoreCase("empleado")) {
+            if (attrWhere == null) {
+                dt = TransactionManager.consultarEmpleados();
+            }
+        } else if (tabla.equalsIgnoreCase("plantel")) {
+            if (attrWhere == null) {
+                dt = TransactionManager.consultarPlanteles();
+            }
         }
 
         return dt;
