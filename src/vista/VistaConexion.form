@@ -584,6 +584,9 @@
       </AuxValues>
     </Component>
     <Component class="javax.swing.JTextField" name="s3IP">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="25.22.91.234"/>
+      </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="txtIPs[2] = s3IP;"/>
       </AuxValues>

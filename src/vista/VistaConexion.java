@@ -184,6 +184,8 @@ public class VistaConexion extends javax.swing.JFrame {
 
         s2Int.setText("Sitio2Capacisoft");
 
+        s3IP.setText("25.22.91.234");
+
         jLabel8.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel8.setText("Puerto:");
 

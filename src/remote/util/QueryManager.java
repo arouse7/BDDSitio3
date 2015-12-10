@@ -24,9 +24,21 @@ import remote.util.InterfaceManager.Interfaces;
  */
 public class QueryManager {
 
-    private static final ThreadLocal<Short> TRANSACTION_OK = new ThreadLocal<>();
-
     private static volatile short transactionOk;
+
+    public static DataTable localInsert(boolean savePKs, String tabla,
+            DataTable datos) {
+
+        DataTable ok;
+        BaseDAO dao = new BaseDAO();
+        //Insertar todas las tablas....
+        ok = dao.add(tabla, datos, savePKs);
+
+        System.out.println("Inserción de " + tabla + " , resultado: "
+                + ok);
+
+        return ok;
+    }
 
     /**
      * Inserta los datos de todas las tablas en la interface del sitio elegido.
@@ -136,67 +148,6 @@ public class QueryManager {
                 + transactionOk);
 
         return transactionOk;
-    }
-
-    public static DataTable localInsert(boolean savePKs, String tabla,
-            DataTable datos) {
-
-        DataTable ok;
-        BaseDAO dao = new BaseDAO();
-        //Insertar todas las tablas....
-        ok = dao.add(tabla, datos, savePKs);
-
-        System.out.println("Inserción de " + tabla + " , resultado: "
-                + ok);
-
-        return ok;
-    }
-
-    public static DataTable uniGet(Interfaces interfaceSitio, String tableName,
-            String[] projectColumns, String[] projectAliases, Map<String, ?> attrWhere) {
-        DataTable ok = null;
-        try {
-            if (interfaceSitio == Interfaces.LOCALHOST) {
-                ok = new BaseDAO().get(tableName, projectColumns, projectAliases, attrWhere);
-            } else {
-                Sitio sitio = InterfaceManager.getInterface(
-                        InterfaceManager.getInterfaceServicio(interfaceSitio));
-
-                
-                if (sitio != null) {
-                    ok = sitio.get(tableName, projectColumns, projectAliases, attrWhere);
-                }
-            }
-
-        } catch (RemoteException | NotBoundException ex) {
-            Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
-            ok = null;
-        }
-        
-        System.out.println("Consulta en el sitio: " + interfaceSitio + ", resultado = " + ok );
-        return ok;
-    }
-
-    public static Integer getMaxId(Interfaces interfaceSitio, String tabla,
-            String columnaID) {
-        DataTable tablaID;
-        Integer ok;
-        try {
-            if (interfaceSitio == Interfaces.LOCALHOST) {
-                tablaID = new BaseDAO().get(tabla, new String[]{"MAX(" + columnaID + ")"},
-                        new String[]{"id"}, null);
-            } else {
-                tablaID = InterfaceManager.getInterface(InterfaceManager.getInterfaceServicio(interfaceSitio))
-                        .get(tabla, new String[]{"MAX(" + columnaID + ")"}, new String[]{"id"}, null);
-            }
-            tablaID.next();
-            ok = tablaID.getInt("id");
-        } catch (RemoteException | NotBoundException | NullPointerException ex) {
-            Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
-            ok = -1;
-        }
-        return ok;
-
     }
 
     public static Boolean localUpdate(String tabla, DataTable datos,
@@ -375,4 +326,56 @@ public class QueryManager {
 
         return transactionOk;
     }
+
+    public static DataTable uniGet(Interfaces interfaceSitio, String tableName,
+            String[] projectColumns, String[] projectAliases, Map<String, ?> attrWhere) {
+        DataTable ok = null;
+        try {
+            if (interfaceSitio == Interfaces.LOCALHOST) {
+                ok = new BaseDAO().get(tableName, projectColumns, projectAliases, attrWhere);
+                System.out.println("Get en el sitio: "
+                        + interfaceSitio + ", resultado = " + ok);
+            } else {
+                Sitio sitio = InterfaceManager.getInterface(
+                        InterfaceManager.getInterfaceServicio(interfaceSitio));
+
+                //insertar los datos
+                if (sitio != null) {
+
+                    ok = sitio.get(tableName, projectColumns, projectAliases, attrWhere);
+
+                    System.out.println("Get en el sitio: "
+                            + interfaceSitio + ", resultado = " + ok);
+                }
+            }
+
+        } catch (RemoteException | NotBoundException ex) {
+            Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
+            ok = null;
+        }
+        return ok;
+    }
+
+    public static Integer getMaxId(Interfaces interfaceSitio, String tabla,
+            String columnaID) {
+        DataTable tablaID;
+        Integer ok;
+        try {
+            if (interfaceSitio == Interfaces.LOCALHOST) {
+                tablaID = new BaseDAO().get(tabla, new String[]{"MAX(" + columnaID + ")"},
+                        new String[]{"id"}, null);
+            } else {
+                tablaID = InterfaceManager.getInterface(InterfaceManager.getInterfaceServicio(interfaceSitio))
+                        .get(tabla, new String[]{"MAX(" + columnaID + ")"}, new String[]{"id"}, null);
+            }
+            tablaID.next();
+            ok = tablaID.getInt("id");
+        } catch (RemoteException | NotBoundException | NullPointerException ex) {
+            Logger.getLogger(QueryManager.class.getName()).log(Level.SEVERE, null, ex);
+            ok = -1;
+        }
+        return ok;
+
+    }
+
 }

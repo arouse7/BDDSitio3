@@ -57,7 +57,7 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
 
         if (tabla.equalsIgnoreCase("empleado")) {
             datos.rewind();
-            //ok = TransactionManager.insertEmpleado(datos);
+            ok = TransactionManager.updateEmpleado(datos, attrWhere);
             System.out.println("Modificación de empleado, resultado: "
                     + ok);
 
@@ -85,7 +85,7 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
         boolean ok = false;
 
         if (tabla.equalsIgnoreCase("empleado")) {
-            //ok = TransactionManager.insertEmpleado(true, tabla, datos);
+            ok = TransactionManager.deleteEmpleado(attrWhere);
         } else if (tabla.equalsIgnoreCase(("plantel"))) {
             //ok = TransactionManager.insertPlantel(false, tabla, datos);
         } else if (tabla.equalsIgnoreCase("implementacion_evento_empleado")) {
@@ -111,13 +111,42 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
         } else if (tabla.equalsIgnoreCase("empleado")) {
             if (attrWhere == null) {
                 dt = TransactionManager.consultarEmpleados();
+            } else if (attrWhere.containsKey("numero")) {
+                dt = TransactionManager.getEmpleado(columnas, attrWhere);
             }
         } else if (tabla.equalsIgnoreCase("plantel")) {
-            if (attrWhere == null) {
-                dt = TransactionManager.consultarPlanteles();
+            if (attrWhere == null || !attrWhere.containsKey("id")) {
+                dt = TransactionManager.consultarPlanteles(attrWhere);
+            } else {
+                dt = TransactionManager.getPlantel(attrWhere);
             }
         }
 
         return dt;
+    }
+
+    @Override
+    public DataTable getEmpleadosByPlantel(int idPlantel) throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public DataTable getImplementacionesByEmpleado(String numeroEmpleado) throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public DataTable getEmpleadosByDepartamento(int idDepartamento) throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public DataTable getEmpleadosByDireccion(int idDireccion) throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public DataTable getEmpleadosByPuesto(int idPuesto) throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
