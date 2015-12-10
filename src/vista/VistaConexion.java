@@ -45,10 +45,14 @@ public class VistaConexion extends javax.swing.JFrame {
             InetAddress[] dir = Inet4Address.getAllByName(InetAddress.getLocalHost().getHostName());
             String direcciones = "";
             for (int i = 0; i < dir.length; i++) {
-                direcciones += i+": " + dir[i].getHostAddress()+ "\n";
+                direcciones += i + ": " + dir[i].getHostAddress() + "\n";
             }
-            int index = Integer.valueOf(JOptionPane.showInputDialog(direcciones += "\nCuál IP"));
-
+            int index;
+            try {
+                index = Integer.valueOf(JOptionPane.showInputDialog(direcciones += "\n¿Cuál IP ?"));
+            } catch (NumberFormatException e) {
+                index = 0;
+            }
             s3IP.setText(dir[index].getHostAddress());
 
         } catch (UnknownHostException ex) {
