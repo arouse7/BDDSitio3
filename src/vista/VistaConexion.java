@@ -5,11 +5,15 @@
  */
 package vista;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import local.AccesoLocal;
 import local.InicioServidor;
@@ -33,9 +37,23 @@ public class VistaConexion extends javax.swing.JFrame {
      */
     public VistaConexion() {
         initComponents();
+        this.setTitle("Sitio 3");
         txtIPs[6] = s7IP;
         txtPuertos[6] = s7Puerto;
         txtInts[6] = s7Int;
+        try {
+            InetAddress[] dir = Inet4Address.getAllByName(InetAddress.getLocalHost().getHostName());
+            String direcciones = "";
+            for (int i = 0; i < dir.length; i++) {
+                direcciones += i+": " + dir[i].getHostAddress()+ "\n";
+            }
+            int index = Integer.valueOf(JOptionPane.showInputDialog(direcciones += "\nCuál IP"));
+
+            s3IP.setText(dir[index].getHostAddress());
+
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(VistaConexion.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
