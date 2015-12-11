@@ -71,7 +71,10 @@ public class TransactionManager {
         System.out.println("---------Start Insert Empleado transaction---------- ");
         datos.rewind();
         datos.next();
-        if (zonaEmpleado(datos.getString(EMPLEADO_ID)) == -1) {
+
+        Integer zonaEmp = zonaEmpleado(datos.getString(EMPLEADO_ID));
+
+        if (zonaEmp != null && zonaEmp == -1) {
 
             short result = MAL;
             DataTable[] fragmentos;
@@ -184,7 +187,7 @@ public class TransactionManager {
 
     /**
      * Retorna el número de la zona a la que pertenece, -1 si no existe el
-     * empleado.
+     * empleado, null si hay problemas al obtener la información.
      *
      * @param numero
      * @return
@@ -217,7 +220,7 @@ public class TransactionManager {
 
         } catch (NullPointerException e) {
             System.out.println("NullPointer uniGet verificarExistenciaEmpleado");
-            zona = -1;
+            zona = null;
         }
         return zona;
     }
@@ -340,47 +343,49 @@ public class TransactionManager {
         List<Interfaces> sitios = new ArrayList<>();
 
         String idEmpleado = datos.getString(EMPLEADO_ID);
-        int zona = zonaEmpleado(idEmpleado);
+        Integer zona = zonaEmpleado(idEmpleado);
         Map<String, Object> condicion = new HashMap<>();
         condicion.put(EMPLEADO_ID, idEmpleado);
 
-        switch (zona) {
-            case 1:
+        if (zona != null) {
+            switch (zona) {
+                case 1:
 
-                sitios.add(Interfaces.SITIO_1);
-                sitios.add(Interfaces.SITIO_2);
-                if (multiDelete(EMPLEADO, condicion,
-                        sitios.toArray(new Interfaces[sitios.size()]))) {
-                    insertEmpleado(datos);
-                } else {
-                    System.out.println("No se pudo eliminar empleado, no se completo modificación");
-                }
-                break;
-            case 2:
-                sitios.add(Interfaces.LOCALHOST);
-                sitios.add(Interfaces.SITIO_4);
-                if (multiDelete(EMPLEADO, condicion,
-                        sitios.toArray(new Interfaces[sitios.size()]))) {
-                    insertEmpleado(datos);
-                } else {
-                    System.out.println("No se pudo eliminar empleado, no se completo modificación");
-                }
+                    sitios.add(Interfaces.SITIO_1);
+                    sitios.add(Interfaces.SITIO_2);
+                    if (multiDelete(EMPLEADO, condicion,
+                            sitios.toArray(new Interfaces[sitios.size()]))) {
+                        insertEmpleado(datos);
+                    } else {
+                        System.out.println("No se pudo eliminar empleado, no se completo modificación");
+                    }
+                    break;
+                case 2:
+                    sitios.add(Interfaces.LOCALHOST);
+                    sitios.add(Interfaces.SITIO_4);
+                    if (multiDelete(EMPLEADO, condicion,
+                            sitios.toArray(new Interfaces[sitios.size()]))) {
+                        insertEmpleado(datos);
+                    } else {
+                        System.out.println("No se pudo eliminar empleado, no se completo modificación");
+                    }
 
-                break;
-            case 3:
-                sitios.add(Interfaces.SITIO_5);
-                sitios.add(Interfaces.SITIO_6);
-                sitios.add(Interfaces.SITIO_7);
-                if (multiDelete(EMPLEADO, condicion,
-                        sitios.toArray(new Interfaces[sitios.size()]))) {
-                    insertEmpleado(datos);
-                } else {
-                    System.out.println("No se pudo eliminar empleado, no se completo modificación");
-                }
+                    break;
+                case 3:
+                    sitios.add(Interfaces.SITIO_5);
+                    sitios.add(Interfaces.SITIO_6);
+                    sitios.add(Interfaces.SITIO_7);
+                    if (multiDelete(EMPLEADO, condicion,
+                            sitios.toArray(new Interfaces[sitios.size()]))) {
+                        insertEmpleado(datos);
+                    } else {
+                        System.out.println("No se pudo eliminar empleado, no se completo modificación");
+                    }
 
-                break;
-            default:
+                    break;
+                default:
 
+            }
         }
 
         System.out.println("--------- Update Empleado: " + ok);
