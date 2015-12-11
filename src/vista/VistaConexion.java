@@ -180,10 +180,12 @@ public class VistaConexion extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel3.setText("IP:");
 
+        s1IP.setText("192.168.1.102");
+
         jLabel4.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel4.setText("Puerto:");
 
-        s1Puerto.setText("11973");
+        s1Puerto.setText("11990");
 
         jLabel23.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel23.setText("Interface:");
@@ -196,15 +198,19 @@ public class VistaConexion extends javax.swing.JFrame {
         jLabel6.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel6.setText("IP:");
 
+        s2IP.setText("192.168.1.102");
+
         jLabel7.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel7.setText("Puerto:");
 
-        s2Puerto.setText("11973");
+        s2Puerto.setText("11976");
 
         jLabel24.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel24.setText("Interface:");
 
         s2Int.setText("Sitio2Capacisoft");
+
+        s3IP.setText("192.168.1.102");
 
         jLabel8.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel8.setText("Puerto:");
@@ -227,7 +233,7 @@ public class VistaConexion extends javax.swing.JFrame {
         jLabel14.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel14.setText("Puerto:");
 
-        s4Puerto.setText("11974");
+        s4Puerto.setText("11978");
 
         jLabel27.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel27.setText("Interface:");
@@ -240,10 +246,12 @@ public class VistaConexion extends javax.swing.JFrame {
         jLabel16.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel16.setText("IP:");
 
+        s5IP.setText("192.168.1.102");
+
         jLabel17.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel17.setText("Puerto:");
 
-        s5Puerto.setText("11973");
+        s5Puerto.setText("11980");
 
         jLabel28.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel28.setText("Interface:");
@@ -256,10 +264,12 @@ public class VistaConexion extends javax.swing.JFrame {
         jLabel19.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel19.setText("IP:");
 
+        s6IP.setText("192.168.1.102");
+
         jLabel20.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel20.setText("Puerto:");
 
-        s6Puerto.setText("11973");
+        s6Puerto.setText("11982");
 
         jLabel29.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel29.setText("Interface:");
@@ -272,10 +282,12 @@ public class VistaConexion extends javax.swing.JFrame {
         jLabel22.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel22.setText("IP:");
 
+        s7IP.setText("192.168.1.102");
+
         jLabel30.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel30.setText("Puerto:");
 
-        s7Puerto.setText("11973");
+        s7Puerto.setText("11984");
 
         jLabel31.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel31.setText("Interface:");
@@ -310,7 +322,7 @@ public class VistaConexion extends javax.swing.JFrame {
         jLabel35.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel35.setText("Puerto:");
 
-        persistPuerto.setText("11977");
+        persistPuerto.setText("11972");
 
         jLabel36.setFont(new java.awt.Font("Source Sans Pro", 1, 18)); // NOI18N
         jLabel36.setText("Persistencia");

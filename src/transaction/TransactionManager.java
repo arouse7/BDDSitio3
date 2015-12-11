@@ -74,7 +74,7 @@ public class TransactionManager {
 
         Integer zonaEmp = zonaEmpleado(datos.getString(EMPLEADO_ID));
         System.out.println("Zona emp: "+zonaEmp);
-//        if (zonaEmp != null && zonaEmp == -1) {
+        if (zonaEmp != null && zonaEmp == -1) {
 
             short result = MAL;
             DataTable[] fragmentos;
@@ -176,10 +176,10 @@ public class TransactionManager {
                 ok = false;
                 rollback(sitios);
             }
-//        } else {
-//            ok = false;
-//            System.out.println("Empleado id existe");
-//        }
+        } else {
+            ok = false;
+            System.out.println("Empleado id existe");
+        }
         System.out.println("Insert empleado: " + ok);
         System.out.println("---------End Insert Empleado transaction----------");
         return ok;
@@ -206,7 +206,7 @@ public class TransactionManager {
                 ok = QueryManager.uniGet(Interfaces.SITIO_7, EMPLEADO, null, null, condicion)
                         .next();
                 if (!ok) {
-                    ok = QueryManager.uniGet(Interfaces.SITIO_1, EMPLEADO, null, null, condicion)
+                    ok = QueryManager.uniGet(Interfaces.SITIO_2, EMPLEADO, null, null, condicion)
                             .next();
                     if (ok) {
                         zona = 1;
@@ -493,15 +493,14 @@ public class TransactionManager {
             "apellido_paterno",
             "apellido_materno",};
 
-//        DataTable fragDatosSitio1 = QueryManager.uniGet(Interfaces.SITIO_1, "empleado", columnas, null, null);
-//        DataTable fragDatosSitio4 = QueryManager.uniGet(Interfaces.SITIO_4, "empleado", columnas, null, null);
-//        DataTable fragDatosSitio7 = QueryManager.uniGet(Interfaces.SITIO_7, "empleado", columnas, null, null);
-//
-//        return DataTable.combinarFragH(fragDatosSitio1, fragDatosSitio4, fragDatosSitio7);
+        DataTable fragDatosSitio1 = QueryManager.uniGet(Interfaces.SITIO_1, "empleado", columnas, null, null);
         DataTable fragDatosSitio4 = QueryManager.uniGet(Interfaces.SITIO_4, "empleado", columnas, null, null);
+        DataTable fragDatosSitio7 = QueryManager.uniGet(Interfaces.SITIO_7, "empleado", columnas, null, null);
 
-        return fragDatosSitio4;
-
+        return DataTable.combinarFragH(fragDatosSitio1, fragDatosSitio4, fragDatosSitio7);
+//        DataTable fragDatosSitio4 = QueryManager.uniGet(Interfaces.SITIO_4, "empleado", columnas, null, null);
+//
+//        return fragDatosSitio4;
     }
 
     //Modificar para su sitio
@@ -531,7 +530,7 @@ public class TransactionManager {
         }
 
         if (empleado == null || empleado.getRowCount() == 0) {
-            //En caso de no encontrarse se busca en el nodo 4
+            //En caso de no encontrarse se busca en el nodo 1
             empleado = QueryManager.uniGet(Interfaces.SITIO_1, EMPLEADO, null,
                     null, condicion);
             if (columnas == null || segundoFragmento) {
@@ -559,22 +558,22 @@ public class TransactionManager {
     //Modificar para su sitio
     public static DataTable consultarPlanteles(Map attrWhere) {
 
-//        //Zona 1
-//        DataTable fragDatosZona1 = QueryManager.uniGet(
-//                Interfaces.SITIO_1, PLANTEL, null, null, attrWhere);
-//        //Zona 2
-//        DataTable fragDatosZona2 = QueryManager.uniGet(
-//                Interfaces.LOCALHOST, PLANTEL, null, null, attrWhere);
-//        //Zona 3
-//        DataTable fragDatosZona3 = QueryManager.uniGet(
-//                Interfaces.SITIO_7, PLANTEL, null, null, attrWhere);
-//
-//        return DataTable.combinarFragH(fragDatosZona1, fragDatosZona2,
-//                fragDatosZona3);
+        //Zona 1
+        DataTable fragDatosZona1 = QueryManager.uniGet(
+                Interfaces.SITIO_2, PLANTEL, null, null, attrWhere);
         //Zona 2
         DataTable fragDatosZona2 = QueryManager.uniGet(
                 Interfaces.LOCALHOST, PLANTEL, null, null, attrWhere);
-        return fragDatosZona2;
+        //Zona 3
+        DataTable fragDatosZona3 = QueryManager.uniGet(
+                Interfaces.SITIO_7, PLANTEL, null, null, attrWhere);
+
+        return DataTable.combinarFragH(fragDatosZona1, fragDatosZona2,
+                fragDatosZona3);
+//        Zona 2
+//        DataTable fragDatosZona2 = QueryManager.uniGet(
+//                Interfaces.LOCALHOST, PLANTEL, null, null, attrWhere);
+//        return fragDatosZona2;
     }
 
     //Modificar para su sitio
