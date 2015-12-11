@@ -27,18 +27,18 @@ import remote.util.QueryManager;
  */
 public class TransactionManager {
 
-    private static final String COLUMNA_ID_EMPLEADO = "numero";
-    private static final String[] FRAG_LLAVES = {COLUMNA_ID_EMPLEADO, "correo", "adscripcion_id",
+    private static final String EMPLEADO_ID = "numero";
+    private static final String[] FRAG_LLAVES = {EMPLEADO_ID, "correo", "adscripcion_id",
         "departamento_id", "plantel_id", "direccion_id"};
-    private static final String[] FRAG_DATOS = {COLUMNA_ID_EMPLEADO, "primer_nombre", "segundo_nombre",
+    private static final String[] FRAG_DATOS = {EMPLEADO_ID, "primer_nombre", "segundo_nombre",
         "apellido_paterno", "apellido_materno", "puesto_id"};
-    private static final String COLUMNA_ID_PLANTEL = "id";
+    private static final String PLANTEL_ID = "id";
     private static final String EMPLEADO = "empleado";
     private static final String PLANTEL = "plantel";
     private static final short BIEN = 1;
-    private static final int LLAVES = BIEN;
+    private static final short LLAVES = BIEN;
     private static final short MAL = 0;
-    private static final int NOMBRES = MAL;
+    private static final short NOMBRES = MAL;
 
     public static boolean insertReplicado(boolean savePKs, String tabla,
             DataTable datos) {
@@ -64,17 +64,17 @@ public class TransactionManager {
         return ok;
     }
 
+    //Modificar para su sitio
     public static boolean insertEmpleado(DataTable datos) {
         boolean ok = true;
 
         System.out.println("---------Start Insert Empleado transaction---------- ");
-
-        if (!existeEmpleado(datos)) {
+        datos.rewind();
+        datos.next();
+        if (zonaEmpleado(datos.getString(EMPLEADO_ID)) == -1) {
 
             short result = MAL;
             DataTable[] fragmentos;
-            datos.rewind();
-            datos.next();
             List<Interfaces> sitios = new ArrayList<>();
             fragmentos = datos.fragmentarVertical(FRAG_DATOS, FRAG_LLAVES);
             datos.rewind();
@@ -94,7 +94,7 @@ public class TransactionManager {
             } else {
 
                 Map<String, Object> condicion = new HashMap<>();
-                condicion.put(COLUMNA_ID_PLANTEL, datos.getInt("plantel_id"));
+                condicion.put(PLANTEL_ID, datos.getInt("plantel_id"));
 
                 DataTable plantel = QueryManager.uniGet(Interfaces.LOCALHOST,
                         PLANTEL, null, null, condicion);
@@ -183,17 +183,18 @@ public class TransactionManager {
     }
 
     /**
-     * Retorna verdadero si existe el id del empleado, falso de otra forma.
+     * Retorna el número de la zona a la que pertenece, -1 si no existe el
+     * empleado.
      *
-     * @param datos
+     * @param numero
      * @return
      */
-    public static boolean existeEmpleado(DataTable datos) {
+    //Modificar para su sitio
+    public static Integer zonaEmpleado(String numero) {
         boolean ok;
+        Integer zona = -1;
         Map<String, Object> condicion = new HashMap<>();
-        datos.rewind();
-        datos.next();
-        condicion.put(COLUMNA_ID_EMPLEADO, datos.getString(COLUMNA_ID_EMPLEADO));
+        condicion.put(EMPLEADO_ID, numero);
 
         try {
             ok = QueryManager.uniGet(Interfaces.LOCALHOST, EMPLEADO, null, null, condicion)
@@ -204,16 +205,24 @@ public class TransactionManager {
                 if (!ok) {
                     ok = QueryManager.uniGet(Interfaces.SITIO_1, EMPLEADO, null, null, condicion)
                             .next();
+                    if (ok) {
+                        zona = 1;
+                    }
+                } else {
+                    zona = 3;
                 }
+            } else {
+                zona = 2;
             }
 
         } catch (NullPointerException e) {
             System.out.println("NullPointer uniGet verificarExistenciaEmpleado");
-            ok = true;
+            zona = -1;
         }
-        return ok;
+        return zona;
     }
 
+    //Modificar para su sitio
     public static boolean insertPlantel(DataTable datos) {
         boolean ok = true;
 
@@ -224,13 +233,13 @@ public class TransactionManager {
         datos.next();
         List<Interfaces> sitios = new ArrayList<>();
 
-        Integer siguienteID = obtenerSiguienteID(PLANTEL, COLUMNA_ID_PLANTEL, Interfaces.SITIO_1,
+        Integer siguienteID = obtenerSiguienteID(PLANTEL, PLANTEL_ID, Interfaces.SITIO_1,
                 Interfaces.LOCALHOST, Interfaces.SITIO_7);
 
         if (siguienteID > 0) {
             datos.rewind();
             datos.next();
-            datos.setObject(COLUMNA_ID_PLANTEL, siguienteID);
+            datos.setObject(PLANTEL_ID, siguienteID);
 
             if (datos.getInt("zona_id") == 1) {
 
@@ -321,102 +330,59 @@ public class TransactionManager {
         return ok;
     }
 
+    //Modificar para su sitio
     public static boolean updateEmpleado(DataTable datos, Map<String, ?> attrWhere) {
         System.out.println("---------Start Update Empleado transaction---------- ");
         boolean ok = true;
 
-        short result = MAL;
-        DataTable[] fragmentos;
         datos.rewind();
         datos.next();
         List<Interfaces> sitios = new ArrayList<>();
-        fragmentos = datos.fragmentarVertical(FRAG_DATOS, FRAG_LLAVES);
-        datos.rewind();
-        datos.next();
-        if (datos.getInt("adscripcion_id") != 2) {
-            //Zona1
-            result = QueryManager.uniUpdate(Interfaces.SITIO_1, EMPLEADO,
-                    fragmentos[NOMBRES], attrWhere) == true ? BIEN : MAL;
-            System.out.println("Sitio 1: " + result);
-            result *= QueryManager.uniUpdate(Interfaces.SITIO_2, EMPLEADO,
-                    fragmentos[LLAVES], attrWhere) == true ? BIEN : MAL;
-            System.out.println("Sitio 2: " + result);
 
-            sitios.add(Interfaces.SITIO_1);
-            sitios.add(Interfaces.SITIO_2);
-        } else {
-            //Zona local
-            Map<String, Object> condicion = new HashMap<>();
-            condicion.put(COLUMNA_ID_PLANTEL, datos.getInt("plantel_id"));
+        String idEmpleado = datos.getString(EMPLEADO_ID);
+        int zona = zonaEmpleado(idEmpleado);
+        Map<String, Object> condicion = new HashMap<>();
+        condicion.put(EMPLEADO_ID, idEmpleado);
 
-            DataTable plantel = QueryManager.uniGet(Interfaces.LOCALHOST,
-                    PLANTEL, null, null, condicion);
+        switch (zona) {
+            case 1:
 
-            if (plantel != null && plantel.getRowCount() != 0) {
-                result = QueryManager.localUpdate(EMPLEADO, fragmentos[LLAVES],
-                        attrWhere) == true ? BIEN : MAL;
-
-                System.out.println("Sitio Local: " + result);
-
-                result *= QueryManager.uniUpdate(Interfaces.SITIO_4, EMPLEADO,
-                        fragmentos[NOMBRES], attrWhere) == true ? BIEN : MAL;
-                System.out.println("Sitio 4: " + result);
-
+                sitios.add(Interfaces.SITIO_1);
+                sitios.add(Interfaces.SITIO_2);
+                if (multiDelete(EMPLEADO, condicion,
+                        sitios.toArray(new Interfaces[sitios.size()]))) {
+                    insertEmpleado(datos);
+                } else {
+                    System.out.println("No se pudo eliminar empleado, no se completo modificación");
+                }
+                break;
+            case 2:
                 sitios.add(Interfaces.LOCALHOST);
                 sitios.add(Interfaces.SITIO_4);
-
-            } else {
-                //Zona 1
-                plantel = QueryManager.uniGet(Interfaces.SITIO_2, PLANTEL,
-                        null, null, condicion);
-
-                if (plantel != null && plantel.getRowCount() != 0) {
-
-                    result = QueryManager.uniUpdate(Interfaces.SITIO_1, EMPLEADO,
-                            fragmentos[NOMBRES], attrWhere) == true ? BIEN : MAL;
-                    System.out.println("Sitio 1: " + result);
-
-                    result *= QueryManager.uniUpdate(Interfaces.SITIO_2, EMPLEADO,
-                            fragmentos[LLAVES], attrWhere) == true ? BIEN : MAL;
-
-                    System.out.println("Sitio 2: " + result);
-
-                    sitios.add(Interfaces.SITIO_1);
-                    sitios.add(Interfaces.SITIO_2);
-
+                if (multiDelete(EMPLEADO, condicion,
+                        sitios.toArray(new Interfaces[sitios.size()]))) {
+                    insertEmpleado(datos);
                 } else {
-                    //Zona 3
-                    plantel = QueryManager.uniGet(Interfaces.SITIO_7, PLANTEL,
-                            null, null, condicion);
-
-                    if (plantel != null && plantel.getRowCount() != 0) {
-
-                        result = QueryManager.uniUpdate(Interfaces.SITIO_5, EMPLEADO,
-                                fragmentos[LLAVES], attrWhere) == true ? BIEN : MAL;
-                        System.out.println("Sitio 5: " + result);
-
-                        result *= QueryManager.uniUpdate(Interfaces.SITIO_6, EMPLEADO,
-                                fragmentos[LLAVES], attrWhere) == true ? BIEN : MAL;
-                        System.out.println("Sitio 6: " + result);
-
-                        result *= QueryManager.uniUpdate(Interfaces.SITIO_7, EMPLEADO,
-                                fragmentos[NOMBRES], attrWhere) == true ? BIEN : MAL;
-                        System.out.println("Sitio 7: " + result);
-
-                        sitios.add(Interfaces.SITIO_5);
-                        sitios.add(Interfaces.SITIO_6);
-                        sitios.add(Interfaces.SITIO_7);
-
-                    }
+                    System.out.println("No se pudo eliminar empleado, no se completo modificación");
                 }
-            }
+
+                break;
+            case 3:
+                sitios.add(Interfaces.SITIO_5);
+                sitios.add(Interfaces.SITIO_6);
+                sitios.add(Interfaces.SITIO_7);
+                if (multiDelete(EMPLEADO, condicion,
+                        sitios.toArray(new Interfaces[sitios.size()]))) {
+                    insertEmpleado(datos);
+                } else {
+                    System.out.println("No se pudo eliminar empleado, no se completo modificación");
+                }
+
+                break;
+            default:
+
         }
-        if (result == BIEN) {
-            commit(sitios);
-        } else {
-            ok = false;
-            rollback(sitios);
-        }
+
         System.out.println("--------- Update Empleado: " + ok);
         System.out.println("---------End Update Empleado transaction---------- ");
         return ok;
@@ -445,91 +411,78 @@ public class TransactionManager {
         return ok;
     }
 
+    //Modificar para su sitio
     public static boolean deleteEmpleado(Map<String, ?> attrWhere) {
         System.out.println("---------Start Delete Empleado transaction---------- ");
         boolean ok = true;
 
-        short result = MAL;
         List<Interfaces> sitios = new ArrayList<>();
 
-        //Zona local
-        Map<String, Object> condicion = new HashMap<>();
-        condicion.put(COLUMNA_ID_EMPLEADO, attrWhere.get(COLUMNA_ID_EMPLEADO));
-
+//        int zona = zonaEmpleado(String.valueOf(attrWhere.get(COLUMNA_ID_EMPLEADO)));
         DataTable empleado = QueryManager.uniGet(Interfaces.LOCALHOST,
-                EMPLEADO, null, null, condicion);
+                EMPLEADO, null, null, attrWhere);
 
         if (empleado != null && empleado.getRowCount() != 0) {
-            result = QueryManager.localDelete(EMPLEADO, attrWhere)
-                    == true ? BIEN : MAL;
-
-            System.out.println("Sitio Local: " + result);
-
-            result *= QueryManager.uniDelete(Interfaces.SITIO_4, EMPLEADO, attrWhere)
-                    == true ? BIEN : MAL;
-            System.out.println("Sitio 4: " + result);
-
             sitios.add(Interfaces.LOCALHOST);
             sitios.add(Interfaces.SITIO_4);
-
+            ok = multiDelete(EMPLEADO, attrWhere,
+                    sitios.toArray(new Interfaces[sitios.size()]));
         } else {
             //Zona 1
             empleado = QueryManager.uniGet(Interfaces.SITIO_2, EMPLEADO,
-                    null, null, condicion);
+                    null, null, attrWhere);
 
             if (empleado != null && empleado.getRowCount() != 0) {
-
-                result = QueryManager.uniDelete(Interfaces.SITIO_1, EMPLEADO,
-                        attrWhere) == true ? BIEN : MAL;
-                System.out.println("Sitio 1: " + result);
-
-                result *= QueryManager.uniDelete(Interfaces.SITIO_2, EMPLEADO,
-                        attrWhere) == true ? BIEN : MAL;
-
-                System.out.println("Sitio 2: " + result);
-
                 sitios.add(Interfaces.SITIO_1);
                 sitios.add(Interfaces.SITIO_2);
-
+                ok = multiDelete(EMPLEADO, attrWhere,
+                        sitios.toArray(new Interfaces[sitios.size()]));
             } else {
                 //Zona 3
                 empleado = QueryManager.uniGet(Interfaces.SITIO_7, EMPLEADO,
-                        null, null, condicion);
+                        null, null, attrWhere);
 
                 if (empleado != null && empleado.getRowCount() != 0) {
-
-                    result = QueryManager.uniDelete(Interfaces.SITIO_5, EMPLEADO,
-                            attrWhere) == true ? BIEN : MAL;
-                    System.out.println("Sitio 5: " + result);
-
-                    result *= QueryManager.uniDelete(Interfaces.SITIO_6, EMPLEADO,
-                            attrWhere) == true ? BIEN : MAL;
-                    System.out.println("Sitio 6: " + result);
-
-                    result *= QueryManager.uniDelete(Interfaces.SITIO_7, EMPLEADO,
-                            attrWhere) == true ? BIEN : MAL;
-                    System.out.println("Sitio 7: " + result);
-
                     sitios.add(Interfaces.SITIO_5);
                     sitios.add(Interfaces.SITIO_6);
                     sitios.add(Interfaces.SITIO_7);
-
+                    ok = multiDelete(EMPLEADO, attrWhere,
+                            sitios.toArray(new Interfaces[sitios.size()]));
                 }
             }
-        }
 
-        if (result == BIEN) {
-            commit(sitios);
-        } else {
-            ok = false;
-            rollback(sitios);
+            if (ok) {
+                commit(sitios);
+            } else {
+                ok = false;
+                rollback(sitios);
+            }
         }
         System.out.println("--------- Delete Empleado: " + ok);
         System.out.println("---------End Delete Empleado transaction---------- ");
         return ok;
     }
 
-    public static DataTable consultarEmpleados() {
+    private static boolean multiDelete(String tabla, Map<String, ?> attrWhere,
+            Interfaces... interfaces) {
+        short result = BIEN;
+
+        for (Interfaces interfaceSitio : interfaces) {
+            if (interfaceSitio == Interfaces.LOCALHOST) {
+                result *= QueryManager.localDelete(tabla, attrWhere)
+                        == true ? BIEN : MAL;
+            } else {
+                result *= QueryManager.uniDelete(interfaceSitio, tabla,
+                        attrWhere) == true ? BIEN : MAL;
+            }
+            System.out.println("Delete " + interfaceSitio + ": " + result);
+        }
+
+        return result == 1;
+    }
+
+    //Modificar para su sitio
+    public static DataTable consultarEmpleados(Map attrWhere) {
         String[] columnas = {
             "numero",
             "primer_nombre",
@@ -537,52 +490,53 @@ public class TransactionManager {
             "apellido_paterno",
             "apellido_materno",};
 
-        DataTable fragDatosSitio1 = QueryManager.uniGet(Interfaces.LOCALHOST, "empleado", columnas, null, null);
+        DataTable fragDatosSitio1 = QueryManager.uniGet(Interfaces.SITIO_1, "empleado", columnas, null, null);
         DataTable fragDatosSitio4 = QueryManager.uniGet(Interfaces.SITIO_4, "empleado", columnas, null, null);
         DataTable fragDatosSitio7 = QueryManager.uniGet(Interfaces.SITIO_7, "empleado", columnas, null, null);
-        
+
         return DataTable.combinarFragH(fragDatosSitio1, fragDatosSitio4, fragDatosSitio7);
+
     }
-    
-    public static DataTable getEmpleado(String[] columnas, Map<String, ?> condicion){
+
+    //Modificar para su sitio
+    public static DataTable getEmpleado(String[] columnas, Map<String, ?> condicion) {
         System.out.println("---------Start GetEmpleado transaction---------- ");
 
-        
         String[] fragLlaves = {"numero", "correo", "adscripcion_id",
             "departamento_id", "plantel_id", "direccion_id"};
         List<String> listaLlaves = Arrays.asList(fragLlaves);
         List<String> listaColumnas = null;
-        if(columnas != null){
+        if (columnas != null) {
             listaColumnas = Arrays.asList(columnas);
         }
-        
+
         //Se busca en el nodo local al Empleado[NOMBRES]
         DataTable empleado = QueryManager.uniGet(Interfaces.LOCALHOST,
                 EMPLEADO, columnas, null, condicion);
-        if(columnas == null || listaLlaves.retainAll(listaColumnas)){
+        if (columnas == null || listaLlaves.retainAll(listaColumnas)) {
             DataTable llaves = QueryManager.uniGet(Interfaces.SITIO_2, EMPLEADO,
-                columnas, null, condicion);
-           empleado = DataTable.combinarFragV(empleado, llaves, "numero");
-        }
-        
-        if (empleado == null && empleado.getRowCount() == 0) {
-            //En caso de no encontrarse se busca en el nodo 4
-            empleado = QueryManager.uniGet(Interfaces.SITIO_4, EMPLEADO, null,
-                    null, condicion);
-            if(columnas == null || listaLlaves.retainAll(listaColumnas)){
-                DataTable llaves = QueryManager.uniGet(Interfaces.SITIO_3, EMPLEADO,
                     columnas, null, condicion);
-               empleado = DataTable.combinarFragV(empleado, llaves, "numero");
+            empleado = DataTable.combinarFragV(empleado, llaves, "numero");
+        }
+
+        if (empleado == null && empleado.getRowCount() == 0) {
+            //En caso de no encontrarse se busca en el nodo 1
+            empleado = QueryManager.uniGet(Interfaces.SITIO_1, EMPLEADO, null,
+                    null, condicion);
+            if (columnas == null || listaLlaves.retainAll(listaColumnas)) {
+                DataTable llaves = QueryManager.uniGet(Interfaces.SITIO_3, EMPLEADO,
+                        columnas, null, condicion);
+                empleado = DataTable.combinarFragV(empleado, llaves, "numero");
             }
-            
+
             if (empleado == null && empleado.getRowCount() == 0) {
                 //Por ultimo se busca en el sitio 7 en caso de no encontrarse
                 empleado = QueryManager.uniGet(Interfaces.SITIO_7, EMPLEADO, null,
                         null, condicion);
-                if(columnas == null || listaLlaves.retainAll(listaColumnas)){
+                if (columnas == null || listaLlaves.retainAll(listaColumnas)) {
                     DataTable llaves = QueryManager.uniGet(Interfaces.SITIO_6, EMPLEADO,
-                        columnas, null, condicion);
-                   empleado = DataTable.combinarFragV(empleado, llaves, "numero");
+                            columnas, null, condicion);
+                    empleado = DataTable.combinarFragV(empleado, llaves, "numero");
                 }
             }
         }
@@ -590,40 +544,43 @@ public class TransactionManager {
         System.out.println("---------End GetEmpleado transaction----------");
         return empleado;
     }
-    
+
+    //Modificar para su sitio
     public static DataTable consultarPlanteles(Map attrWhere) {
-        
+
         //Zona 1
         DataTable fragDatosZona1 = QueryManager.uniGet(
                 Interfaces.SITIO_1, PLANTEL, null, null, attrWhere);
         //Zona 2
         DataTable fragDatosZona2 = QueryManager.uniGet(
-                Interfaces.SITIO_3, PLANTEL, null, null, attrWhere);
+                Interfaces.LOCALHOST, PLANTEL, null, null, attrWhere);
         //Zona 3
         DataTable fragDatosZona3 = QueryManager.uniGet(
-                Interfaces.LOCALHOST,PLANTEL, null, null, attrWhere);
-        
+                Interfaces.SITIO_7, PLANTEL, null, null, attrWhere);
+
         return DataTable.combinarFragH(fragDatosZona1, fragDatosZona2,
                 fragDatosZona3);
+
     }
-    
-    public static DataTable getPlantel(Map<String, ?> condicion){
+
+    //Modificar para su sitio
+    public static DataTable getPlantel(Map<String, ?> condicion) {
         System.out.println("---------Start GetPlantel transaction---------- ");
 
         //Se busca en el nodo local (Zona 3)
-        DataTable plantel = QueryManager.uniGet(Interfaces.LOCALHOST,
+        DataTable plantel = QueryManager.uniGet(Interfaces.SITIO_7,
                 PLANTEL, null, null, condicion);
-        
+
         if (plantel == null || plantel.isEmpty()) {
             //Si no se encontró en la Zona 3 buscar en la Zona 2
-            plantel = QueryManager.uniGet(Interfaces.SITIO_3, PLANTEL, null, null,
+            plantel = QueryManager.uniGet(Interfaces.LOCALHOST, PLANTEL, null, null,
                     condicion);
-            
+
             if (plantel == null || plantel.isEmpty()) {
                 //Si no esta en la Zona 2 buscar en la Zona 1
                 plantel = QueryManager.uniGet(Interfaces.SITIO_1, PLANTEL,
                         null, null, condicion);
-                
+
                 //Si no se encontró aquí regresar el plantel vacío de todos modos
             }
         }

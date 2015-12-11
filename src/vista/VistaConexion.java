@@ -51,7 +51,7 @@ public class VistaConexion extends javax.swing.JFrame {
             try {
                 index = Integer.valueOf(JOptionPane.showInputDialog(direcciones += "\n¿Cuál IP ?"));
             } catch (NumberFormatException e) {
-                index = 0;
+                index = 2;
             }
             s3IP.setText(dir[index].getHostAddress());
 
@@ -206,8 +206,6 @@ public class VistaConexion extends javax.swing.JFrame {
 
         s2Int.setText("Sitio2Capacisoft");
 
-        s3IP.setText("25.22.91.234");
-
         jLabel8.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel8.setText("Puerto:");
 
@@ -224,10 +222,12 @@ public class VistaConexion extends javax.swing.JFrame {
         jLabel10.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel10.setText("IP:");
 
+        s4IP.setText("192.168.1.102");
+
         jLabel14.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel14.setText("Puerto:");
 
-        s4Puerto.setText("11973");
+        s4Puerto.setText("11974");
 
         jLabel27.setFont(new java.awt.Font("Source Sans Pro", 1, 15)); // NOI18N
         jLabel27.setText("Interface:");
