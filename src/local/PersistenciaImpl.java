@@ -139,7 +139,7 @@ public class PersistenciaImpl extends UnicastRemoteObject implements Persistenci
 
     @Override
     public DataTable getImplementacionesByEmpleado(String numeroEmpleado) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new DataTable();
     }
 
 }
